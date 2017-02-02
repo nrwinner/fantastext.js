@@ -18,6 +18,13 @@ Any forms you want the plugin to scan, intialize as so:
   <input dynatype="email" type="text" placeholder="Email Address" />
 </form>
 ```
+
+Scan the DOM for DynaType objects with
+
+```javascript
+dynatype.scan();
+```
+
 Emails aren't validate while typing, but rather on form submit.
 
 Currently supported values for dynatype:
@@ -33,4 +40,4 @@ dynatype.formatDate("-", "MM-DD-YYYY");
 
 
 # Cons
-* The goToElement function DOES REQUIRE JQUERY (sorry I'm terribly with JavaScript animation)
+* The goToElement function DOES REQUIRE JQUERY (sorry I'm terrible with JavaScript animation)

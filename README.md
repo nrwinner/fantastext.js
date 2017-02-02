@@ -21,9 +21,9 @@ Any forms you want the plugin to scan, intialize as so:
 Emails aren't validate while typing, but rather on form submit.
 
 Currently supported values for dynatype:
-- "phone" (phone numbers, formatted as (aaa) aaa-aaaa
-- "date" (Dates, default format is MM/DD/YYYY
-- "ssn" (Social security numbers, formatted as aaa-aa-aaaa
+- "phone" (phone numbers, formatted as '(aaa) aaa-aaaa')
+- "date" (Dates, default format is 'MM/DD/YYYY')
+- "ssn" (Social security numbers, formatted as 'aaa-aa-aaaa')
 - "email" (Emails, validated on form submit)
 
 Changing date format

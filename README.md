@@ -29,7 +29,7 @@ Currently supported values for FantasText:
 - "ssn" (Social security numbers, formatted as 'aaa-aa-aaaa')
 - "email" (Emails, validated on form submit)
 
-Changing date format
+# Changing date format
 The first argument here is the separator character, the second is the total format of the date.
 ```javascript
 fantastext.formatDate("-", "MM-DD-YYYY");

@@ -1,5 +1,3 @@
-// TODO-ENHANCE make this support deleting from middle of string id:25
-
 function FantasText() {
     this.elements = null;
     this.dateSeparator = "/";

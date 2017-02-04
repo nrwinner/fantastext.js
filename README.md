@@ -1,33 +1,33 @@
-# DynaType
+# FantasText
 A lightweight, vanilla Javascript plugin for formatting text in text boxes as it's typed.
 
 # How it works
-Import the dynatype.js file into your HTML. Initialize the dynatype object like:
+Import the fantastext.js file into your HTML. Initialize the fantastext object like:
 
 ```Javascript
-var dynatype = new DynaType();
+var fantastext = new FantasText();
 ```
 
 Any forms you want the plugin to scan, intialize as so:
 
 ```html
-<form class="dynatype">
-  <input dynatype="ssn" type="text" placeholder="Social Security #" />
-  <input dynatype="date" type="text" placeholder="Date of Birth" />
-  <input dynatype="phone" type="text" placeholder="Phone Number" />
-  <input dynatype="email" type="text" placeholder="Email Address" />
+<form class="fantastext">
+  <input fantastext="ssn" type="text" placeholder="Social Security #" />
+  <input fantastext="date" type="text" placeholder="Date of Birth" />
+  <input fantastext="phone" type="text" placeholder="Phone Number" />
+  <input fantastext="email" type="text" placeholder="Email Address" />
 </form>
 ```
 
-Scan the DOM for DynaType objects with
+Scan the DOM for FantasText objects with
 
 ```javascript
-dynatype.scan();
+fantastext.scan();
 ```
 
 Emails aren't validate while typing, but rather on form submit.
 
-Currently supported values for dynatype:
+Currently supported values for fantastext:
 - "phone" (phone numbers, formatted as '(aaa) aaa-aaaa')
 - "date" (Dates, default format is 'MM/DD/YYYY')
 - "ssn" (Social security numbers, formatted as 'aaa-aa-aaaa')
@@ -35,9 +35,5 @@ Currently supported values for dynatype:
 
 Changing date format
 ```javascript
-dynatype.formatDate("-", "MM-DD-YYYY");
+fantastext.formatDate("-", "MM-DD-YYYY");
 ```
-
-
-# Cons
-* The goToElement function DOES REQUIRE JQUERY (sorry I'm terrible with JavaScript animation)

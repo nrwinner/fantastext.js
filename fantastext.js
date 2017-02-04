@@ -54,9 +54,9 @@ FantasText.prototype.parseInput = function(e) {
 
 
     if (n != null) {
-        e.srcElement.value = n[0];
-        e.srcElement.setAttribute("fantastextvalue", n[1]);
-        e.srcElement.setSelectionRange(n[2], n[2]);
+        e.srcElement.value = n[0]; // sets input value
+        e.srcElement.setAttribute("fantastextvalue", n[1]); // sets attribute fantastextvalue to the test string, IE unformatted
+        e.srcElement.setSelectionRange(n[2], n[2]); // sets cursor to correct position
     }
 }
 
@@ -109,8 +109,6 @@ FantasText.prototype.stepDate = function(element, pos) {
 }
 
 FantasText.prototype.stepPhone = function(element, pos) {
-
-    // TODO-ENHANCE support 1 (800) numbers? id:23
     var val = element.value;
     var actual = (element.attributes.fantastextvalue != undefined) ? element.attributes.fantastextvalue.value : undefined;
     var test = val.replace(new RegExp(/[^0-9]/, "g"), "");
@@ -118,8 +116,13 @@ FantasText.prototype.stepPhone = function(element, pos) {
 
     var direction = (actual == undefined || actual.length < test.length) ? 1 : -1;
 
-    if (test.length > 7) val = "(" + test.substring(0, 3) + ") " + test.substring(3, 6) + "-" + test.substring(6);
-    else if (test.length > 3) val = "(" + test.substring(0, 3) + ") " + test.substring(3);
+    if (test.length > 7) {
+        if (test.charAt(0) == "1") val = "1 (" + test.substring(1, 4) + ") " + test.substring(4, 7) + "-" + test.substring(7);
+        else val = "(" + test.substring(0, 3) + ") " + test.substring(3, 6) + "-" + test.substring(6);
+    } else if (test.length > 3) {
+        if (test.charAt(0) == "1") val = "1 (" + test.substring(1, 4) + ") " + test.substring(4);
+        else val = "(" + test.substring(0, 3) + ") " + test.substring(3);
+    }
     else  val = test;
 
     pos = getNewPosition(val, originalVal, test, pos, direction);
@@ -156,7 +159,7 @@ FantasText.prototype.isEmail = function(email, allowEmpty) {
     return email.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/);
 }
 
-// helper functions
+// returns the distance to the next valid character (IE not something added by the plugin like a '-' or a '(')
 function findNextCharacterDistance(val, test, index, direction) {
     if (direction > 0) {
         // we're adding
@@ -169,12 +172,12 @@ function findNextCharacterDistance(val, test, index, direction) {
     }
 }
 
+// returns new start/end positions for cursor
 function getNewPosition(val, originalVal, test, pos, direction) {
     // we've backspaced
     if (direction < 0) {
         if (pos < originalVal.length) {
-            // pos -= originalVal.length - val.length;
-
+            // not deleting from end
             // if the character at the position we've selected isn't in the test string (IE a '-' or a ' ')
             pos -= findNextCharacterDistance(val, test, pos, direction);
         }
@@ -182,8 +185,6 @@ function getNewPosition(val, originalVal, test, pos, direction) {
         // we've added
         if (pos < originalVal.length) {
             // not adding to end
-            // pos += originalVal.length - val.length;
-
             // if the character at the position we've selected isn't in the test string (IE a '-' or a ' ')
             pos += findNextCharacterDistance(val, test, pos, direction);
         } else {

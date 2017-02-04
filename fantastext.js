@@ -63,7 +63,11 @@ FantasText.prototype.parseInput = function(e) {
 // steps
 FantasText.prototype.stepSSN = function(element, pos) {
     var val = element.value;
+    var actual = (element.attributes.fantastextvalue != undefined) ? element.attributes.fantastextvalue.value : undefined;
     var test = val.replace(new RegExp(/[^0-9]/, "g"), "").substring(0, 9);
+    var originalVal = val;
+
+    var direction = (actual == undefined || actual.length < test.length) ? 1 : -1;
 
     if (test.length > 3) {
         val = test.substring(0, 3) + "-" + test.substring(3);
@@ -74,6 +78,8 @@ FantasText.prototype.stepSSN = function(element, pos) {
     if (test.length > 5) {
         val = val.substring(0, 6) + "-" + test.substring(5);
     }
+
+    pos = getNewPosition(val, originalVal, test, pos, direction);
 
     return [val, test, pos];
 }
@@ -124,19 +130,21 @@ FantasText.prototype.stepPhone = function(element, pos) {
 // parent validate
 FantasText.prototype.validate = function(event) {
     var valid = true;
-    var elementsInForm = document.querySelectorAll("[fantastext]", this);
+    var elementsInForm = event.srcElement.children;
 
     for (var i = 0; i < elementsInForm.length; i++) {
         var e = elementsInForm[i];
 
-        if (e.attributes.fantastext.value == "email") valid = this.isEmail(e.value, true);
+        if (e.hasAttribute("fantastext")) {
+            if (e.attributes.fantastext.value == "email") valid = this.isEmail(e.value, true);
 
-        if (!valid) {
-            event.preventDefault();
-            var body = document.getElementsByTagName("body")[0];
-            var event = new CustomEvent("fantastext-validate-error", {"detail": e});
-            body.dispatchEvent(event);
-            return;
+            if (!valid) {
+                event.preventDefault();
+                var body = document.getElementsByTagName("body")[0];
+                var event = new CustomEvent("fantastext-validate-error", {"detail": e});
+                body.dispatchEvent(event);
+                return;
+            }
         }
     }
 }
@@ -152,7 +160,7 @@ FantasText.prototype.isEmail = function(email, allowEmpty) {
 function findNextCharacterDistance(val, test, index, direction) {
     if (direction > 0) {
         // we're adding
-        for (i = index; i < val.length; i++) if (test.indexOf(val.charAt(i)) >= 0) return i - index;
+        for (i = index; i < val.length; i++) if (test.indexOf(val.charAt(i - 1)) >= 0) return i - index;
         return -1;
     } else if (direction < 0) {
         // we're deleting
@@ -165,7 +173,7 @@ function getNewPosition(val, originalVal, test, pos, direction) {
     // we've backspaced
     if (direction < 0) {
         if (pos < originalVal.length) {
-            pos -= originalVal.length - val.length;
+            // pos -= originalVal.length - val.length;
 
             // if the character at the position we've selected isn't in the test string (IE a '-' or a ' ')
             pos -= findNextCharacterDistance(val, test, pos, direction);
@@ -174,7 +182,7 @@ function getNewPosition(val, originalVal, test, pos, direction) {
         // we've added
         if (pos < originalVal.length) {
             // not adding to end
-            pos += originalVal.length - val.length;
+            // pos += originalVal.length - val.length;
 
             // if the character at the position we've selected isn't in the test string (IE a '-' or a ' ')
             pos += findNextCharacterDistance(val, test, pos, direction);

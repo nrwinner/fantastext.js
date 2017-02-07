@@ -77,7 +77,7 @@ FantasText.prototype.stepSSN = function(element, pos) {
         val = val.substring(0, 6) + "-" + test.substring(5);
     }
 
-    pos = getNewPosition(val, originalVal, test, pos, direction);
+    pos = this.getNewPosition(val, originalVal, test, pos, direction);
 
     return [val, test, pos];
 }
@@ -101,11 +101,12 @@ FantasText.prototype.stepDate = function(element, pos) {
         val = val.substring(0, date[0].length + date[1].length + 1) + this.dateSeparator + val.substring(date[0].length + date[1].length + 1);
     }
 
-    pos = getNewPosition(val, originalVal, test, pos, direction);
+    pos = this.getNewPosition(val, originalVal, test, pos, direction);
 
     return [val, test, pos];
 }
 
+// TODO rewrite this, getNewPosition doesnt work.
 FantasText.prototype.stepPhone = function(element, pos) {
     var val = element.value;
     var actual = (element.attributes.fantastextvalue != undefined) ? element.attributes.fantastextvalue.value : undefined;
@@ -115,15 +116,24 @@ FantasText.prototype.stepPhone = function(element, pos) {
     var direction = (actual == undefined || actual.length < test.length) ? 1 : -1;
 
     if (test.length > 7) {
-        if (test.charAt(0) == "1") val = "1 (" + test.substring(1, 4) + ") " + test.substring(4, 7) + "-" + test.substring(7);
-        else val = "(" + test.substring(0, 3) + ") " + test.substring(3, 6) + "-" + test.substring(6);
+        if (test.charAt(0) == "1") {
+            val = "1 (" + test.substring(1, 4) + ") " + test.substring(4, 7) + "-" + test.substring(7);
+        }
+        else {
+            val = "(" + test.substring(0, 3) + ") " + test.substring(3, 6) + "-" + test.substring(6);
+        }
     } else if (test.length > 3) {
-        if (test.charAt(0) == "1") val = "1 (" + test.substring(1, 4) + ") " + test.substring(4);
-        else val = "(" + test.substring(0, 3) + ") " + test.substring(3);
+        if (test.charAt(0) == "1") {
+            val = "1 (" + test.substring(1, 4) + ") " + test.substring(4);
+        }
+        else {
+            val = "(" + test.substring(0, 3) + ") " + test.substring(3);
+        }
     }
-    else  val = test;
+    else val = test;
 
-    pos = getNewPosition(val, originalVal, test, pos, direction);
+    test = val.replace(new RegExp(/[^0-9]/, "g"), "");
+    pos = this.getNewPosition(val, originalVal, test, pos, direction);
 
     return [val, test, pos];
 }
@@ -157,38 +167,47 @@ FantasText.prototype.isEmail = function(email, allowEmpty) {
     return email.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/);
 }
 
-// returns the distance to the next valid character (IE not something added by the plugin like a '-' or a '(')
-function findNextCharacterDistance(val, test, index, direction) {
-    if (direction > 0) {
-        // we're adding
-        for (i = index; i < val.length; i++) if (test.indexOf(val.charAt(i - 1)) >= 0) return i - index;
-        return -1;
-    } else if (direction < 0) {
-        // we're deleting
-        for (i = index; i > 0; i--) if (test.indexOf(val.charAt(i - 1)) >= 0) return index - i;
-        return -1;
+
+FantasText.prototype.getNewPosition = function (val, originalVal, test, pos, direction) {
+    // check for added characters and adjust as necessary
+    if (val.length > originalVal.length) {
+        // we've added ahracters somewhere, lets compare the two invalid arrays and see if we need to adjust the cursor position
+        var origInvalids = this.getInvalidCharacters(originalVal, pos);
+        var invalids = this.getInvalidCharacters(val);
+        pos += invalids.length - origInvalids.length;
+    } else if (originalVal.length > val.length) {
+        // we've removed something somewhere
+        var origInvalids = this.getInvalidCharacters(originalVal, pos);
+        var invalids = this.getInvalidCharacters(val);
+        pos -= origInvalids.length - invalids.length;
+    }
+
+    if (direction < 0) {
+        // deleting
+        for (var i = pos; i >= 0; i--) {
+            if (test.indexOf(val.charAt(i - 1)) >= 0) return i;
+        }
+
+        return 0;
+    } else {
+        // adding
+        for (var i = pos; i < val.length; i++) {
+            if (test.indexOf(val.charAt(i - 1)) >= 0) return i;
+        }
+
+        return val.length;
     }
 }
 
-// returns new start/end positions for cursor
-function getNewPosition(val, originalVal, test, pos, direction) {
-    // we've backspaced
-    if (direction < 0) {
-        if (pos < originalVal.length) {
-            // not deleting from end
-            // if the character at the position we've selected isn't in the test string (IE a '-' or a ' ')
-            pos -= findNextCharacterDistance(val, test, pos, direction);
-        }
-    } else if (direction > 0) {
-        // we've added
-        if (pos < originalVal.length) {
-            // not adding to end
-            // if the character at the position we've selected isn't in the test string (IE a '-' or a ' ')
-            pos += findNextCharacterDistance(val, test, pos, direction);
-        } else {
-            pos = val.length;
+FantasText.prototype.getInvalidCharacters = function(val, pos) {
+    pos = (typeof pos !== "number") ? val.length : pos;
+    var indexes = [];
+
+    for (var i = 0; i < pos; i++) {
+        if (val.charAt(i).match(/[^0-9]/g)) {
+            indexes.push([i, val.charAt(i)]);
         }
     }
 
-    return pos;
+    return indexes;
 }

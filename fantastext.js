@@ -108,9 +108,9 @@ FantasText.prototype.stepDate = function(element, pos) {
 
 FantasText.prototype.stepPhone = function(element, pos) {
     var val = element.value;
+    var originalVal = val;
     var actual = (element.attributes.fantastextvalue != undefined) ? element.attributes.fantastextvalue.value : undefined;
     var test = val.replace(new RegExp(/[^0-9]/, "g"), "");
-    var originalVal = val;
 
     var direction = (actual == undefined || actual.length < test.length) ? 1 : -1;
 
@@ -131,7 +131,6 @@ FantasText.prototype.stepPhone = function(element, pos) {
     }
     else val = test;
 
-    test = val.replace(new RegExp(/[^0-9]/, "g"), "");
     pos = this.getNewPosition(val, originalVal, test, pos, direction);
 
     return [val, test, pos];
@@ -169,17 +168,12 @@ FantasText.prototype.isEmail = function(email, allowEmpty) {
 
 FantasText.prototype.getNewPosition = function (val, originalVal, test, pos, direction) {
     // check for added characters and adjust as necessary
-    if (val.length > originalVal.length) {
-        // we've added ahracters somewhere, lets compare the two invalid arrays and see if we need to adjust the cursor position
-        var origInvalids = this.getInvalidCharacters(originalVal, pos);
-        var invalids = this.getInvalidCharacters(val);
-        pos += invalids.length - origInvalids.length;
-    } else if (originalVal.length > val.length) {
-        // we've removed something somewhere
-        var origInvalids = this.getInvalidCharacters(originalVal, pos);
-        var invalids = this.getInvalidCharacters(val);
-        pos -= origInvalids.length - invalids.length;
-    }
+
+    var invalids = this.getInvalidCharacters(val, pos);
+    var origInvalids = this.getInvalidCharacters(originalVal, pos);
+
+    if (val.length > originalVal.length) pos += this.getOffset(invalids, origInvalids, pos);
+    else if (originalVal.length > val.length) pos -= this.getOffset(origInvalids, invalids, pos);
 
     if (direction < 0) {
         // deleting
@@ -209,4 +203,19 @@ FantasText.prototype.getInvalidCharacters = function(val, pos) {
     }
 
     return indexes;
+}
+
+FantasText.prototype.getOffset = function(larger, smaller, pos) {
+    var offset = 0;
+    for (var i = 0; i < larger.length; i++) {
+        var a = larger[i];
+        var b = smaller[i];
+
+        if (typeof b !== "object" || (a[0] != b[0] || a[1] != b[1]) && a[0] < pos) {
+            // larger array contains this, smaller array doesn't, and it is before our cursor position
+            offset++;
+        }
+    }
+
+    return offset;
 }

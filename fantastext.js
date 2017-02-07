@@ -106,7 +106,6 @@ FantasText.prototype.stepDate = function(element, pos) {
     return [val, test, pos];
 }
 
-// TODO rewrite this, getNewPosition doesnt work.
 FantasText.prototype.stepPhone = function(element, pos) {
     var val = element.value;
     var actual = (element.attributes.fantastextvalue != undefined) ? element.attributes.fantastextvalue.value : undefined;

@@ -44,7 +44,7 @@ When FantasText prevents form submission, it triggers an event on the body calle
 
 Here is an example of using this event in your own scripts. This is jQuery; it listens for the event on the body, adds the class ```error``` to the problem element, and then scrolls to it.
 ```javascript
-("body").on("fantastext-validate-error", function(e) {
+$("body").on("fantastext-validate-error", function(e) {
     $(e.detail).addClass("error");
     $("html, body").animate({scrollTop: $(e.detail).offset().top - 200}, 400);
 })
